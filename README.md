@@ -66,10 +66,10 @@ generator = Upi::Generator.new(
     name: 'Test Name',
     amount: 100,
     note: 'Test Description'
-    ) 
+) 
 
 # Generate UPI payment URL
-payment_url = generator.generate_url
+payment_url = generator.upi_content
 puts payment_url
 
 # The generate_url method returns a UPI URI string that can be used as a link in your HTML:

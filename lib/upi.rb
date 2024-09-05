@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'rqrcode'
+require 'chunky_png'
+require 'uri'
 require_relative 'upi/version'
 
 module Upi
