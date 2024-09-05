@@ -40,6 +40,13 @@ RSpec.describe Upi::Generator do
         expect(qr_code_svg).to include('<svg')
         expect(qr_code_svg).to include('xmlns="http://www.w3.org/2000/svg"')
       end
+
+      it 'generates a valid QR code in SVG format for an individual' do
+        generator = Upi::Generator.new(**individual_params)
+        png_content = generator.generate_qr(mode: :png)
+
+        expect(png_content[0..7]).to eq("\x89PNG\r\n\x1A\n".b)
+      end
     end
   end
 

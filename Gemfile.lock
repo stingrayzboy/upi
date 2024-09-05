@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    upi (0.1.0)
+    upi (1.0.0)
+      chunky_png
       rqrcode (~> 1.1)
 
 GEM
@@ -56,6 +57,7 @@ PLATFORMS
   arm64-darwin-23
 
 DEPENDENCIES
+  chunky_png
   rake (~> 13.0)
   rqrcode (~> 1.1)
   rspec (~> 3.0)

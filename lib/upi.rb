@@ -21,19 +21,35 @@ module Upi
       }.compact
     end
 
-    def generate_qr
+    def generate_qr(mode: :svg)
       content = upi_content
       qrcode = RQRCode::QRCode.new(content)
 
-      # Output SVG format QR code
-      qrcode.as_svg(
-        color: '000',
-        shape_rendering: 'crispEdges',
-        module_size: 11
-      )
+      case mode
+      when :svg
+        qrcode.as_svg(
+          color: '000',
+          shape_rendering: 'crispEdges',
+          module_size: 11
+        )
+      when :png
+        png = qrcode.as_png(
+          bit_depth: 1,
+          border_modules: 4,
+          color_mode: ChunkyPNG::COLOR_GRAYSCALE,
+          color: 'black',
+          file: nil,
+          fill: 'white',
+          module_px_size: 6, # Adjust size as needed
+          resize_exactly_to: false,
+          resize_gte_to: false,
+          size: 300 # Adjust size as needed
+        )
+        png.to_s
+      else
+        raise ArgumentError, "Unsupported mode: #{mode}. Use :svg or :png."
+      end
     end
-
-    private
 
     def upi_content
       # Manually construct the UPI URI string without URI::UPI
@@ -43,5 +59,4 @@ module Upi
   end
 
   class Error < StandardError; end
-  # Your code goes here...
 end
