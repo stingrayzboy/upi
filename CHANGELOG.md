@@ -1,5 +1,8 @@
 ## [Unreleased]
 
+## [1.0.1] - 2024-09-05
+- Linting Fixes
+
 ## [1.0.0] - 2024-09-05
 
 - Added `mode` option to `generate_qr` method to support both PNG and SVG formats.
