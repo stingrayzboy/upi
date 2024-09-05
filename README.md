@@ -1,8 +1,6 @@
-# Upi
+# UPI
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/upi`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+The `upi` gem allows you to generate UPI QR codes for user-to-user payments. It supports both PNG and SVG formats for QR codes.
 
 ## Installation
 
@@ -22,7 +20,87 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+Usage
+Generating a QR Code
+To generate a UPI QR code, you need to initialize the Upi::Generator class with the required parameters and call the generate_qr method.
+
+Example
+
+```ruby
+require 'upi'
+```
+
+### Create a new UPI QR code generator instance
+```ruby
+generator = Upi::Generator.new(
+  upi_id: 'test@upi',
+  name: 'Test Name',
+  amount: 100,
+  note: 'Test Description'
+)
+
+```
+
+### Generate QR code in SVG format
+```ruby
+svg_content = generator.generate_qr(mode: :svg)
+File.write('qr_code.svg', svg_content)
+```
+
+### Generate QR code in PNG format
+```ruby
+png_content = generator.generate_qr(mode: :png)
+File.binwrite('qr_code.png', png_content)
+```
+
+### Generating a Payment URL
+You can generate a UPI payment URL suitable for use in HTML links by using the generate_url method. This URL can be used as the href attribute in a "Pay Now" button or link.
+
+Example
+```ruby
+require 'upi'
+
+# Create a new UPI URL generator instance
+generator = Upi::Generator.new(
+    upi_id: 'test@upi',
+    name: 'Test Name',
+    amount: 100,
+    note: 'Test Description'
+    ) 
+
+# Generate UPI payment URL
+payment_url = generator.generate_url
+puts payment_url
+
+# The generate_url method returns a UPI URI string that can be used as a link in your HTML:
+```
+
+```html
+<a href="<%= payment_url %>">Pay Now</a>
+```
+
+#### In the example above:
+
+* Replace `'test@upi'` with the UPI ID of the recipient.
+* Replace `'Test Name'` with the recipient's name.
+* The `amount` parameter specifies the payment amount.
+* `note` is an optional field to include additional information.
+Parameters
+* upi_id: The UPI ID of the recipient.
+* name: The name of the recipient.
+* amount: The amount for the payment (required for UPI transactions).
+* currency: Currency code (default is 'INR').
+* note: Additional note or description for the payment.
+* merchant_code: Optional merchant code.
+* transaction_ref_id: Optional transaction reference ID.
+* transaction_id: Optional transaction ID.
+* url: Optional URL for additional information or payment redirect.
+
+#### Handling PNG and SVG
+You can specify the format of the QR code by using the mode parameter:
+
+* mode: :svg generates an SVG format QR code.
+* mode: :png generates a PNG format QR code.
 
 ## Development
 
@@ -32,7 +110,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/upi. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/upi/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/stingrayzboy/upi. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/upi/blob/master/CODE_OF_CONDUCT.md).
 
 ## License
 
