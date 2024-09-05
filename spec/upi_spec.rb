@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'upi'
 
 RSpec.describe Upi::Generator do
@@ -86,8 +88,8 @@ RSpec.describe Upi::Generator do
         generator = Upi::Generator.new(**merchant_params)
         upi_content = generator.send(:upi_content)
         expect(upi_content).to eq(
-                                 'upi://pay?pa=merchant%40upi&pn=Merchant+Name&am=500&cu=INR&tn=Payment+for+Goods&mc=1234&tr=REF123&tid=TXN456&url=https%3A%2F%2Fmerchant.com%2Fpayment'
-                               )
+          'upi://pay?pa=merchant%40upi&pn=Merchant+Name&am=500&cu=INR&tn=Payment+for+Goods&mc=1234&tr=REF123&tid=TXN456&url=https%3A%2F%2Fmerchant.com%2Fpayment'
+        )
       end
     end
 
