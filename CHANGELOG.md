@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+## [1.0.2] - 2024-09-05
+- Fixed `generate_qr` method to return the QR code as a string instead of writing it to a file.
+- Updated README with new usage instructions.
+
 ## [1.0.1] - 2024-09-05
 - Linting Fixes
 
