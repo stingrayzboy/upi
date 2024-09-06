@@ -20,56 +20,89 @@ Or install it yourself as:
 
 ## Usage
 
-Usage
 Generating a QR Code
 To generate a UPI QR code, you need to initialize the Upi::Generator class with the required parameters and call the generate_qr method.
 
-Example
+### Example
 
-```ruby
-require 'upi'
-```
+Individual Mode:
 
 ### Create a new UPI QR code generator instance
 ```ruby
+require 'upi'
+
 generator = Upi::Generator.new(
   upi_id: 'test@upi',
-  name: 'Test Name',
-  amount: 100,
-  note: 'Test Description'
+  name: 'Test Name'
 )
+
+# NOTE: For Individual Mode the Merchant Code is always 0000 which the code handles by default
 
 ```
 
 ### Generate QR code in SVG format
 ```ruby
-svg_content = generator.generate_qr(mode: :svg)
+svg_content = generator.generate_qr(100, 'Personal Payment', mode: :svg)
 File.write('qr_code.svg', svg_content)
 ```
 
 ### Generate QR code in PNG format
 ```ruby
-png_content = generator.generate_qr(mode: :png)
+png_content = generator.generate_qr(100, 'Personal Payment', mode: :png)
 File.binwrite('qr_code.png', png_content)
 ```
 
 ### Generating a Payment URL
 You can generate a UPI payment URL suitable for use in HTML links by using the generate_url method. This URL can be used as the href attribute in a "Pay Now" button or link.
 
-Example
+```ruby
+# Generate UPI payment URL
+payment_url = generator.upi_content(100, 'Personal Payment')
+puts payment_url
+
+# The generate_url method returns a UPI URI string that can be used as a link in your HTML:
+```
+
+```html
+<a href="<%= payment_url %>">Pay Now</a>
+```
+
+Merchant Mode:
+
+### Create a new UPI QR code generator instance
 ```ruby
 require 'upi'
 
-# Create a new UPI URL generator instance
 generator = Upi::Generator.new(
-    upi_id: 'test@upi',
-    name: 'Test Name',
-    amount: 100,
-    note: 'Test Description'
-) 
+  upi_id: 'test@upi',
+  name: 'Test Name',
+  merchant_code: '1234',
+  currency: 'INR'
+)
 
+# NOTE: For Merchant Mode the Merchant Code needs to be set explicitly
+
+```
+
+### Generate QR code in SVG format
+```ruby
+svg_content = generator.generate_qr(500, 'Payment for Goods', transaction_ref_id: 'REF123', transaction_id: 'TXN456', url: 'https://merchant.com/payment', mode: :svg)
+File.write('qr_code_merchant.svg', svg_content)
+```
+
+### Generate QR code in PNG format
+```ruby
+png_content = generator.generate_qr(500, 'Payment for Goods', transaction_ref_id: 'REF123', transaction_id: 'TXN456', url: 'https://merchant.com/payment', mode: :png)
+File.binwrite('qr_code_merchant.png', png_content)
+```
+
+### Generating a Payment URL
+You can generate a UPI payment URL suitable for use in HTML links by using the generate_url method. This URL can be used as the href attribute in a "Pay Now" button or link.
+
+
+```ruby
 # Generate UPI payment URL
-payment_url = generator.upi_content
+payment_url = generator.upi_content(500, 'Payment for Goods', transaction_ref_id: 'REF123', transaction_id: 'TXN456', url: 'https://merchant.com/payment')
 puts payment_url
 
 # The generate_url method returns a UPI URI string that can be used as a link in your HTML:

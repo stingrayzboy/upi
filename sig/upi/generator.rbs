@@ -1,0 +1,15 @@
+module Upi
+  class Generator
+    @params: Hash[Symbol, String]
+
+    attr_reader params: Hash[Symbol, String]
+
+    def generate_qr: -> String
+
+    def upi_content: -> String
+
+    private
+
+    def generate_transaction: -> Hash[Symbol, String]
+  end
+end

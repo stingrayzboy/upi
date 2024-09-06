@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    upi (1.0.2)
+    upi (2.0.0)
       chunky_png
       rqrcode (~> 1.1)
 
