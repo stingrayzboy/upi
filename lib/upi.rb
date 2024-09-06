@@ -44,27 +44,28 @@ module Upi
   #   svg_content = generator.generate_qr(mode: :svg)
   #   File.write('qr_code.svg', svg_content)
   #
-  # @see https://www.upi.gov.in/ for more details on UPI protocol
+  # @see https://www.npci.org.in/what-we-do/upi/product-overview for more details on UPI protocol
   class Generator
     attr_reader :params
 
-    def initialize(upi_id:, name:, amount: nil, currency: 'INR', note: '', merchant_code: nil, transaction_ref_id: nil, transaction_id: nil, url: nil)
+    def initialize(upi_id:, name:, currency: 'INR', merchant_code: '0000')
       @params = {
         pa: upi_id,
         pn: name,
-        am: amount,
+        am: '',
         cu: currency,
-        tn: note,
+        tn: '',
         mc: merchant_code,
-        tr: transaction_ref_id,
-        tid: transaction_id,
-        url: url
+        tr: nil,
+        tid: nil,
+        url: nil
       }.compact
     end
 
-    def generate_qr(mode: :svg)
-      content = upi_content
+    def generate_qr(amount = '0', note = '', transaction_ref_id: nil, transaction_id: nil, url: nil, mode: :svg)
+      content = upi_content(amount, note, transaction_ref_id: transaction_ref_id, transaction_id: transaction_id, url: url)
       qrcode = RQRCode::QRCode.new(content)
+      generate_transaction(amount, note, transaction_id, transaction_ref_id, url)
 
       case mode
       when :svg
@@ -92,10 +93,23 @@ module Upi
       end
     end
 
-    def upi_content
+    def upi_content(amount = '0', note = '', transaction_ref_id: nil, transaction_id: nil, url: nil)
+      generate_transaction(amount, note, transaction_id, transaction_ref_id, url)
+
       # Manually construct the UPI URI string without URI::UPI
-      query_string = URI.encode_www_form(params)
+      query_string = URI.encode_www_form(params.reject { |_k, v| v.nil? })
       "upi://pay?#{query_string}"
+    end
+
+    private
+
+    def generate_transaction(amount, note, transaction_id, transaction_ref_id, url)
+      @params[:am] = amount
+      @params[:tn] = note
+      @params[:tr] = transaction_ref_id
+      @params[:tid] = transaction_id
+      @params[:url] = url
+      @params
     end
   end
 
