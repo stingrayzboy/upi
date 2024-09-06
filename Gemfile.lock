@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    upi (2.0.0)
+    upi (2.0.1)
       chunky_png
-      rqrcode (~> 1.1)
+      rqrcode (= 2.2.0)
 
 GEM
   remote: https://rubygems.org/
@@ -21,10 +21,10 @@ GEM
     rainbow (3.1.1)
     rake (13.2.1)
     regexp_parser (2.9.2)
-    rqrcode (1.2.0)
+    rqrcode (2.2.0)
       chunky_png (~> 1.0)
-      rqrcode_core (~> 0.2)
-    rqrcode_core (0.2.0)
+      rqrcode_core (~> 1.0)
+    rqrcode_core (1.2.0)
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -61,7 +61,7 @@ PLATFORMS
 DEPENDENCIES
   chunky_png
   rake (~> 13.0)
-  rqrcode (~> 1.1)
+  rqrcode (= 2.2.0)
   rspec (~> 3.0)
   rubocop (~> 1.21)
   upi!

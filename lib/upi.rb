@@ -15,14 +15,12 @@ module Upi
   #
   #   generator = Upi::Generator.new(
   #     upi_id: 'test@upi',
-  #     name: 'Test Name',
-  #     amount: 100,
-  #     note: 'Test Description'
+  #     name: 'Test Name'
   #   )
   #
-  #   svg_content = generator.generate_qr(mode: :svg)
-  #   png_content = generator.generate_qr(mode: :png)
-  #   payment_url = generator.generate_url
+  #   svg_content = generator.generate_qr(100, 'Personal Payment', mode: :svg)
+  #   png_content = generator.generate_qr(100, 'Personal Payment', mode: :png)
+  #   payment_url = generator.upi_content(100, 'Personal Payment')
   #
   # Parameters:
   # - `upi_id`: The UPI ID of the recipient.
@@ -38,10 +36,9 @@ module Upi
   # @example
   #   generator = Upi::Generator.new(
   #     upi_id: 'test@upi',
-  #     name: 'Test Name',
-  #     amount: 100
+  #     name: 'Test Name'
   #   )
-  #   svg_content = generator.generate_qr(mode: :svg)
+  #   svg_content = generator.generate_qr(100, 'Personal Payment', mode: :svg)
   #   File.write('qr_code.svg', svg_content)
   #
   # @see https://www.npci.org.in/what-we-do/upi/product-overview for more details on UPI protocol
