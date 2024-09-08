@@ -43,9 +43,9 @@ module Upi
   #
   # @see https://www.npci.org.in/what-we-do/upi/product-overview for more details on UPI protocol
   class Generator
-    attr_reader :params
+    attr_reader :params, :no_url_parse
 
-    def initialize(upi_id:, name:, currency: 'INR', merchant_code: '0000')
+    def initialize(upi_id:, name:, currency: 'INR', merchant_code: nil, no_url_parse: true)
       @params = {
         pa: upi_id,
         pn: name,
@@ -57,6 +57,7 @@ module Upi
         tid: nil,
         url: nil
       }.compact
+      @no_url_parse = no_url_parse
     end
 
     def generate_qr(amount = '0', note = '', transaction_ref_id: nil, transaction_id: nil, url: nil, mode: :svg)
@@ -94,8 +95,12 @@ module Upi
       generate_transaction(amount, note, transaction_id, transaction_ref_id, url)
 
       # Manually construct the UPI URI string without URI::UPI
-      query_string = URI.encode_www_form(params.reject { |_k, v| v.nil? })
-      "upi://pay?#{query_string}"
+      query_string = if no_url_parse
+                       URI.encode_www_form(params.reject { |k, v| v.nil? || k == :pa })
+                     else
+                       params.reject { |k, v| v.nil? || k == :pa }.map { |k, v| "#{k}=#{v}" }.join('&')
+                     end
+      "upi://pay?pa=#{params[:pa]}&#{query_string}"
     end
 
     private

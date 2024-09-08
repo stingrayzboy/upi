@@ -25,7 +25,7 @@ To generate a UPI QR code, you need to initialize the Upi::Generator class with 
 
 ### Example
 
-Individual Mode:
+## Individual Mode:
 
 ### Create a new UPI QR code generator instance
 ```ruby
@@ -67,7 +67,7 @@ puts payment_url
 <a href="<%= payment_url %>">Pay Now</a>
 ```
 
-Merchant Mode:
+## Merchant Mode:
 
 ### Create a new UPI QR code generator instance
 ```ruby
@@ -134,6 +134,18 @@ You can specify the format of the QR code by using the mode parameter:
 
 * mode: :svg generates an SVG format QR code.
 * mode: :png generates a PNG format QR code.
+
+## No URI parse mode
+
+If you want to generate a QR code without parsing the UPI address, you can use the no_uri_parse option:
+
+```ruby
+svg_content = generator.generate_qr(100, 'Personal Payment', no_uri_parse: true, mode: :svg)
+uri_content = generator.upi_content(100, 'Personal Payment', no_uri_parse: true)
+
+# The no_uri_parse option will generate the QR code without URI parsing the UPI address.
+```
+
 
 ## Development
 

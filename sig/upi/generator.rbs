@@ -1,5 +1,6 @@
 module Upi
   class Generator
+    @no_url_parse: bool
     @params: Hash[Symbol, String]
 
     attr_reader params: Hash[Symbol, String]

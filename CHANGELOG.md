@@ -1,4 +1,13 @@
 ## [Unreleased]
+- In the making
+
+## [2.0.2] - 2024-09-08
+- For Individual Mode there need not be merchant code being sent. Removed default '0000'. Can be still added explicitly.
+- Changed the upi_content method to not parse the upi address and keep it as it is.
+- Add support for no uri parse.
+
+## [2.0.1] - 2024-09-06
+- Updated Dependencies
 
 ## [2.0.0] - 2024-09-06
 - Add support for changing amounts after initialization
