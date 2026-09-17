@@ -32,10 +32,16 @@ module Upi
 
     private
 
-    def render(content, mode, level, options)
+    # Checked before the payload is built, so a mistyped payment keyword names
+    # itself instead of surfacing later as a missing-field error.
+    def check_render!(mode, options)
       raise ArgumentError, "Unsupported mode: #{mode}. Use :svg or :png." unless %i[svg png].include?(mode)
 
       validate_render_options!(options, mode)
+    end
+
+    def render(content, mode, level, options)
+      check_render!(mode, options)
       qrcode = RQRCode::QRCode.new(content, level: level)
 
       if mode == :svg

@@ -127,6 +127,7 @@ module Upi
     def generate_qr(amount = nil, note = nil, transaction_ref_id: nil, transaction_id: nil,
                     url: nil, min_amount: nil, initiation_mode: nil,
                     mode: :svg, level: :m, **render_options)
+      check_render!(mode, render_options)
       content = upi_content(amount, note, transaction_ref_id: transaction_ref_id,
                                           transaction_id: transaction_id, url: url,
                                           min_amount: min_amount, initiation_mode: initiation_mode)

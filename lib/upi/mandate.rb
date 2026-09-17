@@ -142,6 +142,7 @@ module Upi
     def generate_qr(amount, note = nil, mode: :svg, level: :m, **options)
       mandate_options, render_options = options.partition { |key, _| MANDATE_KEYWORDS.include?(key) }
                                                .map(&:to_h)
+      check_render!(mode, render_options)
 
       render(mandate_content(amount, note, **mandate_options), mode, level, render_options)
     end

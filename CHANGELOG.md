@@ -38,9 +38,16 @@ recurring payments.
   it took.
 - `Upi.parse` and `Upi.parse_response` as shorthands.
 
+### Fixed
+- `#generate_qr` validates its renderer arguments before building the payload,
+  so a mistyped payment keyword names itself instead of surfacing as whatever
+  missing-field error the typo happens to cause.
+
 ### Changed
 - The gem is now several files under `lib/upi/` rather than one. `require 'upi'`
   is unchanged.
+- The README is rewritten: quick start, concepts, recipes, a troubleshooting
+  table mapping symptoms to causes, and a full API reference.
 - `bigdecimal` is declared as a runtime dependency, since it became a bundled
   gem in Ruby 3.4. The `base64` stdlib is no longer required at all.
 
