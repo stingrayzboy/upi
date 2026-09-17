@@ -1,8 +1,16 @@
 # UPI
 
-The `upi` gem generates UPI payment URIs and QR codes, in PNG or SVG, that conform to the
-[NPCI UPI Linking Specification](https://www.npci.org.in/what-we-do/upi/product-overview)
+The `upi` gem generates and reads UPI payment URIs and QR codes, in PNG or SVG, conforming to
+the [NPCI UPI Linking Specification](https://www.npci.org.in/what-we-do/upi/product-overview)
 (common URL specification for deep linking and proximity integration).
+
+| | |
+| --- | --- |
+| `Upi::Generator` | builds `upi://pay` URIs and QR codes |
+| `Upi::Mandate` | builds `upi://mandate` URIs for UPI AutoPay |
+| `Upi::Signer` | signs either, for secure QR and intent modes |
+| `Upi::Request` | reads a `upi://` URI back apart, to check a QR you received |
+| `Upi::Response` | reads the reply a PSP app hands back after a payment |
 
 ## Installation
 
@@ -140,6 +148,8 @@ generator.upi_content(500, 'Donation', transaction_ref_id: 'ORD90211', min_amoun
 | `name:` | yes | Payee name shown on the payer's confirmation screen. Max 99 characters. |
 | `currency:` | no | Defaults to `'INR'`, the only value UPI supports. |
 | `merchant_code:` | no | Four-digit ISO 18245 category code. Its presence selects merchant mode. |
+| `org_id:` | no | Six-digit `orgid`. Required when signing. |
+| `signer:` | no | A `Upi::Signer`, see [Signed QR codes](#signed-qr-codes-and-intents). |
 | `no_url_parse:` | no | Encoding strictness, see [Encoding](#encoding). Defaults to `true`. |
 
 ### `#upi_content` and `#generate_qr`
@@ -222,7 +232,159 @@ generator.upi_content(500, 'Goods', transaction_ref_id: 'ORD1',
 
 Signed QR codes (`mode=02`, requiring the `sign` and `orgid` tags) are not supported.
 
-## Upgrading from 2.x
+## Reading the PSP's reply
+
+After the payer's app finishes, it hands the merchant app a response. `Upi::Response` reads it:
+
+```ruby
+response = Upi::Response.parse(params)   # query string, full callback URL, or a hash
+
+response.success?          # => true
+response.transaction_ref   # => "ORD90210"   the tr you sent
+response.transaction_id    # => "AXI7d2f..."  the PSP's own id
+response.response_code     # => "00"
+response.approval_ref_no   # => "122321"
+```
+
+Field names are matched case-insensitively, because apps vary the casing, and both `""` and the
+literal string `"null"` become `nil`.
+
+A payment still in flight reports `pending?` rather than failing:
+
+```ruby
+response.pending?    # true when Status=SUBMITTED, or when no status came back
+```
+
+**This is a hint, not settlement.** The specification is explicit: "merchant app must check the
+final status with their server/PSP server." Treat `success?` as a prompt to confirm server-side,
+never as permission to release goods.
+
+## Reading a QR code you received
+
+`Upi::Request` parses in the other direction, for inspecting someone else's QR:
+
+```ruby
+request = Upi.parse('upi://pay?pa=merchant@upi&pn=Test%20Store&mc=5411&tr=ORD1&am=10.50&cu=INR')
+
+request.payee_address   # => "merchant@upi"
+request.amount          # => BigDecimal("10.5")
+request.merchant?       # => true
+request.dynamic?        # => true   carries an amount
+request.signed?         # => false
+```
+
+Parsing is forgiving where generation is strict: a QR in the wild may well have been built by a
+tool that got the encoding wrong, and refusing to read it helps nobody. Problems surface as
+warnings instead of exceptions, so you can tell a payer *why* their code will not work:
+
+```ruby
+request = Upi.parse('upi://pay?pa=merchant@upi&pn=Test+User&am=0&cu=INR&mc=1234')
+
+request.valid?     # => false
+request.warnings
+# => ["am=0 is rejected by PSP apps; omit the tag to let the payer enter an amount",
+#     "tr is mandatory for merchant transactions carrying an amount, and must be unique per attempt",
+#     "the URI contains a + where a space was probably meant; spaces must be %20"]
+```
+
+That example is a QR built by this gem before 3.0.0.
+
+## Signed QR codes and intents
+
+The specification defines a signed variant: the merchant signs the whole URI with its private
+key, and the payer's PSP verifies it against a public key registered with the acquiring bank.
+
+```ruby
+signer = Upi::Signer.new(File.read('merchant.pem'))
+
+generator = Upi::Generator.new(
+  upi_id: 'merchant@upi',
+  name: 'Acme Store',
+  merchant_code: '5499',
+  org_id: '000000',      # required when signing
+  signer: signer
+)
+
+generator.generate_qr(500, 'Order 1', transaction_ref_id: reference,
+                      initiation_mode: Upi::Generator::MODE_SECURE_QR)
+```
+
+`sign` is emitted as the last tag, as section 1.3 requires, and covers everything before it.
+
+Signing is entirely local — nothing here talks to NPCI. The operational half is not: **your
+keypair must be registered with your acquiring bank** before any PSP will accept the signature.
+Signature *verification* is deliberately not offered; that is the payer PSP's job, done against
+a daily-refreshed cache of registered merchant keys.
+
+## Recurring payments (UPI AutoPay)
+
+`Upi::Mandate` builds `upi://mandate` URIs:
+
+```ruby
+mandate = Upi::Mandate.new(upi_id: 'acme.corp@axis', name: 'Acme Corp', merchant_code: '7322')
+
+mandate.mandate_content(
+  499, 'Monthly plan',
+  transaction_ref_id: 'SUB1042',
+  validity_start: Date.new(2026, 10, 1),
+  validity_end: Date.new(2027, 9, 30),
+  recurrence: Upi::Mandate::MONTHLY,
+  recurrence_type: Upi::Mandate::ON,
+  recurrence_value: 1
+)
+# => "upi://mandate?pa=acme.corp@axis&pn=Acme%20Corp&mc=7322&tr=SUB1042&tn=Monthly%20plan
+#     &am=499.00&amrule=MAX&cu=INR&validitystart=01102026&validityend=30092027
+#     &recur=MONTHLY&recurtype=ON&recurvalue=1&purpose=14&txnType=CREATE"
+```
+
+`generate_qr` works the same as on `Upi::Generator`.
+
+| Option | Values |
+| --- | --- |
+| `recurrence:` | `ONETIME` `DAILY` `WEEKLY` `FORTNIGHTLY` `MONTHLY` `BIMONTHLY` `QUARTERLY` `HALFYEARLY` `YEARLY` `ASPRESENTED` |
+| `recurrence_type:` | `ON` `BEFORE` `AFTER` |
+| `amount_rule:` | `MAX` (a ceiling, the default) or `EXACT` |
+| `transaction_type:` | `CREATE` `UPDATE` `REVOKE` `PAUSE` `UNPAUSE` |
+| `revocable:` `shareable:` `block_funds:` | `true`/`false`, emitted as `Y`/`N` |
+
+Dates accept a `Date` or a `DDMMYYYY` string, and the validity window is checked for ordering.
+
+**A caveat on provenance.** Unlike everything else here, this is not modelled on the NPCI
+Linking Specification, which predates AutoPay and does not describe the mandate tags. It follows
+the deep link published by PSP aggregators, who agree on the core tags but differ at the edges —
+some expect `block=Y/N`, others `True/False`, and the accepted `mode` values vary. Check the
+exact shape against your own PSP before going live; `#tags` shows you what will be emitted:
+
+```ruby
+mandate.tags(499, 'Monthly plan', **options)   # => {pa: "...", recur: "MONTHLY", ...}
+```
+
+## Transports beyond QR
+
+The URI is transport agnostic. The same string can be shown as a QR code, fired as an Android
+intent, or pushed over NFC, BLE or UHF — only the `mode` tag says which route it took:
+
+```ruby
+Upi::Generator::MODE_DEFAULT        # "00"
+Upi::Generator::MODE_QR             # "01"
+Upi::Generator::MODE_SECURE_QR      # "02"
+Upi::Generator::MODE_INTENT         # "04"
+Upi::Generator::MODE_SECURE_INTENT  # "05"
+Upi::Generator::MODE_NFC            # "06"
+Upi::Generator::MODE_BLE            # "07"
+Upi::Generator::MODE_UHF            # "08"
+Upi::Generator::MODE_SEBI           # "15"
+```
+
+Moving the bytes over those transports is your application's job; the gem produces the payload.
+
+## Upgrading
+
+3.1 is purely additive: everything new lives in classes that did not exist before, and existing
+`Upi::Generator` behaviour is unchanged. The gem is now several files under `lib/upi/`, but
+`require 'upi'` still loads everything.
+
+### From 2.x
 
 3.0 changes the generated URI so that it complies with the specification. See the
 [CHANGELOG](CHANGELOG.md) for the full list. The changes most likely to affect you:

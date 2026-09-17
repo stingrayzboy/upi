@@ -1,4 +1,119 @@
 module Upi
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+
+  def self.parse: (String uri, **untyped) -> Request
+  def self.parse_response: (String | Hash[untyped, untyped] input, **untyped) -> Response
+
+  class Error < StandardError
+  end
+
+  class ValidationError < Error
+  end
+
+  class ParseError < Error
+  end
+
+  module Encoding
+    STRICT_UNSAFE: Regexp
+    LENIENT_UNSAFE: Regexp
+    PERCENT_TRIPLET: Regexp
+
+    def self.encode: (untyped value, ?lenient: bool) -> String
+    def self.decode: (untyped value, ?plus_as_space: bool) -> String
+  end
+
+  module Validations
+    CURRENCY: String
+    MAX_LENGTHS: Hash[Symbol, Integer]
+    VPA_PATTERN: Regexp
+    MERCHANT_CODE_PATTERN: Regexp
+    REFERENCE_PATTERN: Regexp
+    ORG_ID_PATTERN: Regexp
+    NUMERIC_PATTERN: Regexp
+    TWO_DIGIT_PATTERN: Regexp
+    MAX_AMOUNT: BigDecimal
+  end
+
+  module Rendering
+    SVG_OPTIONS: Array[Symbol]
+    PNG_OPTIONS: Array[Symbol]
+    SVG_DEFAULTS: Hash[Symbol, untyped]
+    PNG_DEFAULTS: Hash[Symbol, untyped]
+  end
+
+  class Signer
+    DIGEST: untyped
+    MINIMUM_KEY_BITS: Integer
+
+    attr_reader key: untyped
+
+    def initialize: (untyped key, ?passphrase: String?) -> void
+    def sign: (String content) -> String
+    def verify: (String content, String signature) -> bool
+  end
+
+  class Request
+    type tags = Hash[Symbol, String]
+
+    PAY: String
+    MANDATE: String
+    SCHEME: String
+    AMOUNT_TAGS: Array[Symbol]
+    ACCESSORS: Hash[Symbol, Symbol]
+
+    attr_reader action: String
+    attr_reader tags: tags
+    attr_reader uri: String
+
+    def self.parse: (String uri, ?plus_as_space: bool) -> Request
+    def initialize: (String action, tags tags, String uri) -> void
+
+    def payee_address: -> String?
+    def payee_name: -> String?
+    def merchant_code: -> String?
+    def transaction_id: -> String?
+    def transaction_ref: -> String?
+    def note: -> String?
+    def currency: -> String?
+    def url: -> String?
+    def initiation_mode: -> String?
+    def org_id: -> String?
+    def signature: -> String?
+
+    def pay?: -> bool
+    def mandate?: -> bool
+    def signed?: -> bool
+    def dynamic?: -> bool
+    def merchant?: -> bool
+    def valid?: -> bool
+    def amount: -> BigDecimal?
+    def min_amount: -> BigDecimal?
+    def warnings: -> Array[String]
+    def to_h: -> tags
+  end
+
+  class Response
+    SUCCESS: String
+    FAILURE: String
+    SUBMITTED: String
+    APPROVED_CODE: String
+    NULL_VALUES: Array[String]
+    FIELDS: Hash[String, Symbol]
+
+    attr_reader transaction_id: String?
+    attr_reader response_code: String?
+    attr_reader approval_ref_no: String?
+    attr_reader status: String?
+    attr_reader transaction_ref: String?
+    attr_reader raw: Hash[String, String]
+
+    def self.parse: (String | Hash[untyped, untyped] input, ?plus_as_space: bool) -> Response
+    def initialize: (Hash[String, String] params) -> void
+
+    def success?: -> bool
+    def failure?: -> bool
+    def submitted?: -> bool
+    def pending?: -> bool
+    def to_h: -> Hash[Symbol, String?]
+  end
 end

@@ -15,9 +15,6 @@ Layout/LineLength:
 Metrics/MethodLength:
   Max: 60
 
-Metrics/ParameterLists:
-  Max: 15
-
 Metrics/AbcSize:
   Max: 20
 
@@ -28,3 +25,12 @@ Metrics/BlockLength:
   Max: 150
   Exclude:
     - 'spec/**/*_spec.rb'
+
+# Keyword arguments do not carry the positional-confusion risk this cop targets,
+# and the mandate tags genuinely number what they number.
+Metrics/ParameterLists:
+  Max: 15
+  CountKeywordArgs: false
+
+Metrics/ModuleLength:
+  Max: 150
