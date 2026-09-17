@@ -42,13 +42,24 @@ module Upi
 
     # Parses a PSP response.
     #
-    # @param input [String, Hash] the raw query string, a full callback URL, or
-    #   an already-parsed params hash
+    # @param input [String, Hash, nil] the raw query string, a full callback URL,
+    #   or an already-parsed params hash
     # @param plus_as_space [Boolean] decode `+` as a space
+    # @param params [Hash] the response fields, when passed as loose keywords
     # @return [Response]
     # @raise [ParseError] if nothing resembling a response is present
-    def self.parse(input, plus_as_space: true)
-      new(extract(input, plus_as_space))
+    #
+    # Fields may be given positionally or as keywords, because Ruby 3 reads a
+    # braceless hash literal as keywords and a caller should not have to care:
+    #
+    #   Response.parse(request.query_string)
+    #   Response.parse(params)
+    #   Response.parse(Status: 'SUCCESS', txnRef: 'A1')
+    def self.parse(input = nil, plus_as_space: true, **params)
+      source = input.nil? ? params : input
+      raise ParseError, 'response is empty' if source.respond_to?(:empty?) && source.empty?
+
+      new(extract(source, plus_as_space))
     end
 
     def self.extract(input, plus_as_space)

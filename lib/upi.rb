@@ -36,9 +36,9 @@ module Upi
 
   # Reads a PSP response. Shorthand for {Upi::Response.parse}.
   #
-  # @param input [String, Hash]
+  # @param args [Array<String, Hash>]
   # @return [Upi::Response]
-  def self.parse_response(input, **options)
-    Response.parse(input, **options)
+  def self.parse_response(*args, **options)
+    Response.parse(*args, **options)
   end
 end

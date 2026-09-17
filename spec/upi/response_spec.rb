@@ -47,7 +47,18 @@ RSpec.describe Upi::Response do
     end
 
     it 'accepts an already-parsed params hash' do
-      expect(described_class.parse('Status' => 'SUCCESS', 'txnRef' => 'A1')).to be_success
+      params = { 'Status' => 'SUCCESS', 'txnRef' => 'A1' }
+
+      expect(described_class.parse(params)).to be_success
+      expect(described_class.parse(params).transaction_ref).to eq('A1')
+    end
+
+    it 'accepts a hash literal, which Ruby 3 would otherwise read as keywords' do
+      expect(described_class.parse({ 'Status' => 'SUCCESS', 'txnRef' => 'A1' })).to be_success
+    end
+
+    it 'accepts symbol keys as well as strings' do
+      expect(described_class.parse(Status: 'SUCCESS', txnRef: 'A1')).to be_success
     end
 
     it 'matches field names case-insensitively, as apps vary' do
