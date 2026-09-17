@@ -1,16 +1,89 @@
 module Upi
+  class Error < StandardError
+  end
+
+  class ValidationError < Error
+  end
+
   class Generator
+    type amount = Numeric | String | nil
+    type fields = Hash[Symbol, String?]
+
+    CURRENCY: String
+    MODE_DEFAULT: String
+    MODE_QR: String
+    MODE_SECURE_QR: String
+    MODE_INTENT: String
+    MAX_LENGTHS: Hash[Symbol, Integer]
+    VPA_PATTERN: Regexp
+    MERCHANT_CODE_PATTERN: Regexp
+    REFERENCE_PATTERN: Regexp
+    NUMERIC_PATTERN: Regexp
+    MAX_AMOUNT: BigDecimal
+    STRICT_UNSAFE: Regexp
+    LENIENT_UNSAFE: Regexp
+    PARAM_ORDER: Array[Symbol]
+
+    @upi_id: String
+    @name: String
+    @currency: String
+    @merchant_code: String?
     @no_url_parse: bool
     @params: Hash[Symbol, String]
 
     attr_reader params: Hash[Symbol, String]
+    attr_reader no_url_parse: bool
 
-    def generate_qr: -> String
+    def self.generate_reference: (?String prefix) -> String
 
-    def upi_content: -> String
+    def initialize: (
+      upi_id: String,
+      name: String,
+      ?currency: String,
+      ?merchant_code: String?,
+      ?no_url_parse: bool
+    ) -> void
+
+    def upi_content: (
+      ?amount amount,
+      ?String? note,
+      ?transaction_ref_id: String?,
+      ?transaction_id: String?,
+      ?url: String?,
+      ?min_amount: amount,
+      ?initiation_mode: String?
+    ) -> String
+
+    def generate_qr: (
+      ?amount amount,
+      ?String? note,
+      ?transaction_ref_id: String?,
+      ?transaction_id: String?,
+      ?url: String?,
+      ?min_amount: amount,
+      ?initiation_mode: String?,
+      ?mode: Symbol,
+      ?level: Symbol,
+      **untyped render_options
+    ) -> String
 
     private
 
-    def generate_transaction: -> Hash[Symbol, String]
+    def build_fields: (amount, String?, String?, String?, String?, amount, String?) -> fields
+    def require_reference!: (String?, String?) -> void
+    def validate_vpa!: (String) -> String
+    def validate_text!: (String?, Symbol, String) -> String?
+    def validate_currency!: (String) -> String
+    def validate_merchant_code!: (String?) -> String?
+    def validate_reference!: (String?, Symbol, String) -> String?
+    def validate_url!: (String?) -> String?
+    def validate_initiation_mode!: (String?) -> String?
+    def normalize_min_amount: (amount, String?) -> String?
+    def normalize_amount: (amount, String) -> String?
+    def to_decimal: (untyped, String) -> BigDecimal
+    def presence: (String?) -> String?
+    def encode: (untyped, ?lenient: bool) -> String
+    def render_svg: (untyped, Hash[Symbol, untyped]) -> String
+    def render_png: (untyped, Hash[Symbol, untyped]) -> String
   end
 end
