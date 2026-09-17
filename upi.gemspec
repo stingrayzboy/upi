@@ -33,6 +33,7 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   # spec.add_dependency "example-gem", "~> 1.0"
+  spec.add_runtime_dependency 'bigdecimal'
   spec.add_runtime_dependency 'chunky_png'
   spec.add_runtime_dependency 'rqrcode', '2.2.0'
   # For more information and examples about making a new gem, check out our

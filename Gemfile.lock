@@ -1,7 +1,8 @@
 PATH
   remote: .
   specs:
-    upi (3.0.0)
+    upi (3.1.0)
+      bigdecimal
       chunky_png
       rqrcode (= 2.2.0)
 
@@ -9,6 +10,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
+    bigdecimal (4.1.3)
     chunky_png (1.4.0)
     diff-lcs (1.5.1)
     json (2.7.2)
@@ -55,6 +57,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-23
+  arm64-darwin-24
   x86_64-darwin-23
   x86_64-linux
 
@@ -67,4 +70,4 @@ DEPENDENCIES
   upi!
 
 BUNDLED WITH
-   2.3.3
+   2.6.9

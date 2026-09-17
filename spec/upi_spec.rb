@@ -57,6 +57,22 @@ RSpec.describe Upi::Generator do
           .to raise_error(ArgumentError, /unknown keyword: :transaction_ref/)
       end
 
+      # Checked before the payload is built, so the typo names itself instead of
+      # surfacing as the missing-field error the typo happens to cause.
+      it 'reports a mistyped keyword ahead of the field it fails to set' do
+        merchant = described_class.new(**merchant_params)
+
+        expect { merchant.generate_qr(500, 'x', transaction_ref: 'ORD1') }
+          .to raise_error(ArgumentError, /unknown keyword: :transaction_ref/)
+      end
+
+      it 'rejects an unsupported output mode before building anything' do
+        merchant = described_class.new(**merchant_params)
+
+        expect { merchant.generate_qr(500, 'x', mode: :gif) }
+          .to raise_error(ArgumentError, /Unsupported mode/)
+      end
+
       it 'passes renderer options through' do
         generator = described_class.new(**individual_params)
         small = generator.generate_qr(100, 'Tea', mode: :png, module_px_size: 4)

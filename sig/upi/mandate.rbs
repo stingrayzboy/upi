@@ -1,0 +1,58 @@
+module Upi
+  class Mandate
+    include Validations
+    include Rendering
+
+    type amount = Numeric | String
+    type datelike = Date | DateTime | Time | String
+
+    CURRENCY: String
+    ONETIME: String
+    DAILY: String
+    WEEKLY: String
+    FORTNIGHTLY: String
+    MONTHLY: String
+    BIMONTHLY: String
+    QUARTERLY: String
+    HALFYEARLY: String
+    YEARLY: String
+    ASPRESENTED: String
+    RECURRENCES: Array[String]
+    ON: String
+    BEFORE: String
+    AFTER: String
+    RECURRENCE_TYPES: Array[String]
+    MAX: String
+    EXACT: String
+    AMOUNT_RULES: Array[String]
+    CREATE: String
+    UPDATE: String
+    REVOKE: String
+    PAUSE: String
+    UNPAUSE: String
+    TRANSACTION_TYPES: Array[String]
+    DEFAULT_PURPOSE: String
+    DATE_FORMAT: String
+    PARAM_ORDER: Array[Symbol]
+    SIGNATURE_TAG: Symbol
+    MANDATE_KEYWORDS: Array[Symbol]
+
+    attr_reader params: Hash[Symbol, String]
+    attr_reader no_url_parse: bool
+    attr_reader signer: Signer?
+
+    def initialize: (
+      upi_id: String,
+      name: String,
+      ?merchant_code: String?,
+      ?currency: String,
+      ?org_id: String?,
+      ?signer: Signer?,
+      ?no_url_parse: bool
+    ) -> void
+
+    def mandate_content: (amount amount, ?String? note, **untyped) -> String
+    def generate_qr: (amount amount, ?String? note, ?mode: Symbol, ?level: Symbol, **untyped) -> String
+    def tags: (amount amount, ?String? note, **untyped) -> Hash[Symbol, String]
+  end
+end
